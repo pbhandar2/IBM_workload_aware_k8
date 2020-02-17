@@ -23,8 +23,8 @@ if __name__ == "__main__":
 
 	arg_parser.add_argument('trace_type',
 		default="cp_block",
-		help="The trace type which dictates how the trace file is read. ",
-				"Please check if there is an implementation for your file.")
+		help="""The trace type which dictates how the trace file is read.
+			Please check if there is an implementation for your file.""")
 
 	args = arg_parser.parse_args()
 
