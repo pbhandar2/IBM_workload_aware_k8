@@ -21,13 +21,13 @@ if __name__ == "__main__":
 	arg_parser.add_argument('trace_file',
 		help='The trace file to be read.')
 
-	arg_parser.add_argument('trace_type',
+	arg_parser.add_argument('--trace_type',
 		default="cp_block",
 		help="""The trace type which dictates how the trace file is read.
 			Please check if there is an implementation for your file.""")
 
 	args = arg_parser.parse_args()
 
-	if trace_type == "cp_block":
+	if args.trace_type == "cp_block":
 		hit_ratio_dict = get_hit_ratio_dict_cp_block(args.trace_file, "ARC")
 
