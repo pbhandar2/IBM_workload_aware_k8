@@ -2,8 +2,8 @@ from PyMimircache import Cachecow
 import sys
 import argparse  
 
-def get_hit_ratio_dict_cp_block(input_file, algorithm, cache_size):
-    mimircache = Cachecow()
+def get_mimircache_cp_block(input_file):
+	mimircache = Cachecow()
     params = {
             "init_params": {
                     "label": 1,
@@ -11,12 +11,22 @@ def get_hit_ratio_dict_cp_block(input_file, algorithm, cache_size):
                     "delimiter": ","
             }
     }
+    mimircache.open(input_file)
+    return mimircache
+
+def get_hit_count_dict_cp_block(input_file, algorithm, cache_size):
+	mimircache = get_mimircache_cp_block(input_file)
+	hit_count = get_hit_count_dict(algorithm, cache_size, use_general_profiler=True)
+	return hit_count 
+
+def get_hit_ratio_dict_cp_block(input_file, algorithm, cache_size):
+	mimircache = get_mimircache_cp_block(input_file)
     reader = mimircache.open(input_file)
     return mimircache.get_hit_ratio_dict(algorithm, cache_size=cache_size)
 
 if __name__ == "__main__":
 	arg_parser = argparse.ArgumentParser(
-		description='Get ARC hit rate from a block trace.')
+		description='Get hit rate from a block trace.')
 
 	arg_parser.add_argument('trace_file',
 		help='The trace file to be read.')
@@ -40,14 +50,8 @@ if __name__ == "__main__":
 	args = arg_parser.parse_args()
 
 	if args.trace_type == "cp_block":
+		hit_count_dict = get_hit_count_dict_cp_block(args.trace_file, args.algorithm, args.cache_size)
+		print(hit_count_dict)
 
-		hit_ratio_dict = get_hit_ratio_dict_cp_block(args.trace_file, args.algorithm, args.cache_size)
-
-		print(hit_ratio_dict)
-
-		if args.out_path is not None:
-			with open(args.out_path, "w+") as o_handle:
-				for key in hit_ratio_dict:
-					o_handle.write("{},{}\n".format(key,hit_ratio_dict[key]))
 
 
