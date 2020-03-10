@@ -1,0 +1,13 @@
+; fio-rand-read.job for fiotest
+
+[global]
+directory=/
+name=fio-rand-read
+filename=randfile
+rw=randread
+bs=4K
+numjobs=1
+
+[file1]
+size=300M
+ioengine=libaio
