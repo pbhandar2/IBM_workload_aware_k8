@@ -1,0 +1,1 @@
+LAT_LOG_PATH="../experiments/page_cache/pv/lat_log"
