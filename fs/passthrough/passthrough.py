@@ -122,7 +122,7 @@ class KubeCacheFS(Operations):
 
     def read(self, path, length, offset, fh):
         os.lseek(fh, offset, os.SEEK_SET)
-        self.log.write("read,{},{},{}\n".format(full_path, length, offset))
+        self.log.write("read,{},{},{}\n".format(self._full_path(path), length, offset))
         return os.read(fh, length)
 
     def write(self, path, buf, offset, fh):
