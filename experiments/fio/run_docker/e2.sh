@@ -23,7 +23,7 @@ MIN_FS_MEMORY_MB=500
 MAX_FS_MEMORY_MB=2500
 MEMORY_STEP=250
 
-reset_kcahcefs() {
+reset_fs() {
     fs_mountpath="${1:-}"
     fs_storage="${2:-}"
     fs_cachepath="${3:-}"
@@ -51,7 +51,7 @@ reset_kcahcefs() {
     mkdir -p /cache 
     mount -t tmpfs -o size="${cache_size}m" kcache "${fs_cachepath}"
     sleep 5 
-    
+
     if [ "$cache_size" -gt 0 ]; then
         python3 "${__root}/fs/kubecachefs/KubeCacheFS.py" \
             -m "${fs_mountpath}" \
@@ -64,7 +64,6 @@ reset_kcahcefs() {
     fi
 
 }
-
 
 
 # user input 
@@ -90,29 +89,26 @@ do
 
         python3 ${__root}/fs/kubecachefs/generate_config.py ${fs_memory_allocation_mb} ${FS_TYPE}
         FS_CONFIGPATH="${__root}/fs/kubecachefs/config/lru_${FS_TYPE}_${fs_memory_allocation_mb}.json"
-        reset_kcahcefs "/mnt/data/files/kcache_${workload_name}" "/mnt/data/files/${workload_name}" \
+        reset_fs "/mnt/data/files/kcache_${workload_name}" "/mnt/data/files/${workload_name}" \
             "${FS_CACHEPATH}" "${FS_CONFIGPATH}" "${fs_memory_allocation_mb}"
 
 
         # reset the page cache before starting docker 
         sync; echo 3 > /proc/sys/vm/drop_caches 
-
-
         docker run \
             --name="${CONTAINER_NAME}" \
             -m="${container_memory_mb}m" \
             -v /mnt/data:/mnt \
             xridge/fio \
             --name=test \
-            --read_iolog=$io_replay_log_path \
+            --read_iolog=${io_replay_log_path} \
             --read_iolog_chunked=1 \
-            --output-format=json --output=$json_output_path \
-            --write_lat_log=$lat_output_path 
+            --output-format=json --output=${json_output_path} \
+            --write_lat_log=${lat_output_path} 
 
 
         status_code="$(docker container wait ${CONTAINER_NAME})"
         echo "Status code of last run command: ${status_code}"
-
         docker container rm ${CONTAINER_NAME}
         
     done 
