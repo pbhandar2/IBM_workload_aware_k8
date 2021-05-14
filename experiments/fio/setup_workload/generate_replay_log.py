@@ -17,15 +17,17 @@ def main(latency_log_path, file_to_replay, output_file_name):
             while latency_log_line:
                 split_latency_log_line = latency_log_line.split(",")
 
+                # print(split_latency_log_line)
+
                 # gather necessary information from latency log 
-                offset = int(split_latency_log_line[-1])
-                block_size = int(split_latency_log_line[-2])
-                op = int(split_latency_log_line[-3])
+                offset = int(split_latency_log_line[4])
+                block_size = int(split_latency_log_line[3])
+                op = int(split_latency_log_line[2])
 
                 if op == 0:
-                    replay_log_handler.write("{} read {} {}\n".format(file_to_replay, op, block_size))
+                    replay_log_handler.write("{} read {} {}\n".format(file_to_replay, offset, block_size))
                 else:
-                    replay_log_handler.write("{} write {} {}\n".format(file_to_replay, op, block_size))
+                    replay_log_handler.write("{} write {} {}\n".format(file_to_replay, offset, block_size))
 
                 latency_log_line = latency_log_handler.readline().rstrip()
 
