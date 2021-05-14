@@ -36,14 +36,19 @@ mkdir -p "${storagepath}"
 
 ./reset_tmpfs.sh "${cachepath}" "${memory_mb}"
 
-python3 ${__root}/fs/kubecachefs/generate_config.py ${memory_mb} ${fs_type}
-fs_configpath="${__root}/fs/kubecachefs/config/lru_${FS_TYPE}_${fs_memory_allocation_mb}.json"
+if [ ${memory_mb} -gt "0" ];
+then
 
-python3 "${__root}/fs/kubecachefs/KubeCacheFS.py" \
-    -m "${mountpath}" \
-    -s "${storagepath}" \
-    -c "${cachepath}" \
-    -k "${fs_configpath}" &
+    python3 ${__root}/fs/kubecachefs/generate_config.py ${memory_mb} ${fs_type}
+    fs_configpath="${__root}/fs/kubecachefs/config/lru_${fs_type}_${fs_memory_allocation_mb}.json"
+
+    python3 "${__root}/fs/kubecachefs/KubeCacheFS.py" \
+        -m "${mountpath}" \
+        -s "${storagepath}" \
+        -c "${cachepath}" \
+        -k "${fs_configpath}" &
+
+fi
 
 echo "KubeCacheFS is reset and a fresh FS is mounted!"
 sleep 15 # give the FS time to mount 

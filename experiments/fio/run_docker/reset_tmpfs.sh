@@ -16,7 +16,7 @@ __root="$(cd "$(dirname $(dirname $(dirname "${__dir}")))" && pwd)" # <-- change
 
 # user input
 cachepath="${1:-}"
-fs_memory_mb="${2:-}"
+memory_mb="${2:-}"
 
 if mountpoint -q "${cachepath}"; then
     echo "${cachepath} is a mountpoint. Unmounting ..."
@@ -28,6 +28,9 @@ fi
 rm -rf "${cachepath}"
 mkdir -p "${cachepath}"
 
-mount -t tmpfs -o size="${fs_memory_mb}m" kcache "${cachepath}"
+if [ ${memory_mb} -gt "0" ];
+then
+    mount -t tmpfs -o size="${memory_mb}m" kcache "${cachepath}"
+fi
 
 sleep 5 # wait fot 5 seconds just to make sure the FS is mounted and ready for use 

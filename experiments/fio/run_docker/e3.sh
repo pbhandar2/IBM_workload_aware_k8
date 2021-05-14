@@ -27,9 +27,21 @@ fs_memory="${3:-}" # the amount of memory allocated to the FS
 mempressure_start_gb="${4:-}" # the mempressure will start with this value and end 
 
 
+if [ $fs_memory -eq "0" ];
+then
+    FS_TYPE="page_cache"
+    io_replay_log_path="/mnt/replay_logs/${workload_name}.log"
+else
+    # reset the page cache and the FUSE cache before starting 
+    io_replay_log_path="/mnt/replay_logs/kcache_${workload_name}.log"
+    fs_mountpath="/mnt/data/files/kcache_${workload_name}"
+    fs_storagepath="/mnt/data/files/${workload_name}"
+    ./reset_kcache.sh "${fs_mountpath}" "${fs_storagepath}" "${FS_CACHEPATH}" "${fs_memory}" "${FS_TYPE}"
+fi
+
+
 output_directory="/mnt/output/${workload_name}/${FS_TYPE}_mempressure"
 mkdir -p "/mnt/data/output/${workload_name}/${FS_TYPE}_mempressure"
-io_replay_log_path="/mnt/replay_logs/${workload_name}.log"
 
 
 echo "Running workload: ${workload_name}, Memory: ${container_memory}"
@@ -37,11 +49,6 @@ json_output_path="${output_directory}/${container_memory}_${fs_memory}_${mempres
 lat_output_path="${output_directory}/${container_memory}_${fs_memory}_${mempressure_start_gb}"
 echo "JSON: ${json_output_path}, LAT: ${lat_output_path}"
 
-
-# reset the page cache and the FUSE cache before starting 
-fs_mountpath="/mnt/data/files/kcache_${workload_name}"
-fs_storage="/mnt/data/files/${workload_name}"
-./reset_kcache.sh "${fs_mountpath}" "${fs_storagepath}" "${FS_CACHEPATH}" "${fs_memory}" "${FS_TYPE}"
 sync; echo 3 > /proc/sys/vm/drop_caches 
 
 docker run \
@@ -67,4 +74,9 @@ do
     kill -9 "${memtester_pid}"
     mempressure_start_gb=$(($mempressure_start_gb-1))
 done 
+
+
+status_code="$(docker container wait ${CONTAINER_NAME})"
+echo "Status code of last run command: ${status_code}"
+docker container rm ${CONTAINER_NAME}
 
